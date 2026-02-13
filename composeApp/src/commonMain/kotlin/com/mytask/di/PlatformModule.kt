@@ -10,11 +10,11 @@ import org.koin.dsl.module
 expect fun platformModule(): Module
 
 val networkModule = module {
-    single { HttpClient(get()) }
-    single { SheetsApiConfig(get()) }
-    single { SheetsApiService(get(), get()) }
+    single<HttpClient> { HttpClient(get()) }
+    single<SheetsApiConfig> { SheetsApiConfig(get()) }
+    single<SheetsApiService> { SheetsApiService(get(), get()) }
 }
 
 val commonModule = module {
-    single { AppDatabase.create(get()) }
+    single<AppDatabase> { get<AppDatabase>() }
 }

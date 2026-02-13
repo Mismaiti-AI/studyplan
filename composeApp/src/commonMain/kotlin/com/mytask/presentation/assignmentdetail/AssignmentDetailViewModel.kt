@@ -18,20 +18,23 @@ sealed interface AssignmentDetailUiState {
 }
 
 class AssignmentDetailViewModel(
+    private val assignmentId: String,
     private val assignmentRepository: AssignmentRepository
 ) : ViewModel() {
 
-    private var currentAssignmentId: String? = null
-    private var _assignment: Assignment? = null
+    init {
+        loadAssignment()
+    }
 
     val uiState: StateFlow<AssignmentDetailUiState> = combine(
+        assignmentRepository.selectedAssignment,
         assignmentRepository.isLoading,
         assignmentRepository.error
-    ) { isLoading, error ->
+    ) { assignment, isLoading, error ->
         when {
             isLoading -> AssignmentDetailUiState.Loading
             error != null -> AssignmentDetailUiState.Error(error)
-            _assignment != null -> AssignmentDetailUiState.Success(_assignment!!)
+            assignment != null -> AssignmentDetailUiState.Success(assignment)
             else -> AssignmentDetailUiState.Loading
         }
     }.stateIn(
@@ -40,21 +43,15 @@ class AssignmentDetailViewModel(
         initialValue = AssignmentDetailUiState.Loading
     )
 
-    fun loadAssignment(id: String) {
-        currentAssignmentId = id
+    fun loadAssignment() {
         viewModelScope.launch {
-            val assignment = assignmentRepository.getAssignmentById(id)
-            if (assignment != null) {
-                _assignment = assignment
-            }
+            assignmentRepository.selectAssignment(assignmentId)
         }
     }
 
-    fun toggleCompletion(completed: Boolean) {
-        currentAssignmentId?.let { id ->
-            viewModelScope.launch {
-                assignmentRepository.updateAssignmentCompletion(id, completed)
-            }
+    fun toggleCompleted() {
+        viewModelScope.launch {
+            assignmentRepository.toggleAssignmentCompletion(assignmentId)
         }
     }
 }

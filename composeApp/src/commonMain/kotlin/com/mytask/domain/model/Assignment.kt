@@ -1,5 +1,7 @@
 package com.mytask.domain.model
 
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.days
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
@@ -14,9 +16,13 @@ data class Assignment(
     val priority: String = "medium"
 ) {
     val isOverdue: Boolean
-        get() = dueDate != null && dueDate < Instant.fromEpochMilliseconds(System.currentTimeMillis())
-    
+        get() = dueDate != null && dueDate < Clock.System.now()
+
     val isDueSoon: Boolean
-        get() = dueDate != null && dueDate >= Instant.fromEpochMilliseconds(System.currentTimeMillis()) && 
-                dueDate <= Instant.fromEpochMilliseconds(System.currentTimeMillis() + 2 * 24 * 60 * 60 * 1000) // Within 2 days
+        get() {
+            if (dueDate == null) return false
+            val now = Clock.System.now()
+            val twoDaysLater = now + 2.days
+            return dueDate >= now && dueDate <= twoDaysLater
+        }
 }

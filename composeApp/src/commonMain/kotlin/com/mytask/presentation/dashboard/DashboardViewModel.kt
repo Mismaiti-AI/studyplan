@@ -8,6 +8,8 @@ import com.mytask.data.repositories.project.ProjectRepository
 import com.mytask.domain.model.Assignment
 import com.mytask.domain.model.Exam
 import com.mytask.domain.model.Project
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -24,10 +26,15 @@ data class DashboardData(
 
 sealed interface DashboardUiState {
     data object Loading : DashboardUiState
-    data class Success(val data: DashboardData) : DashboardUiState
+    data class Success(
+        val upcomingAssignments: List<Assignment>,
+        val upcomingExams: List<Exam>,
+        val upcomingProjects: List<Project>
+    ) : DashboardUiState
     data class Error(val message: String) : DashboardUiState
 }
 
+@OptIn(ExperimentalTime::class)
 class DashboardViewModel(
     private val assignmentRepository: AssignmentRepository,
     private val examRepository: ExamRepository,
@@ -50,27 +57,20 @@ class DashboardViewModel(
         when {
             combinedError != null -> DashboardUiState.Error(combinedError)
             else -> {
-                val upcomingItems = mutableListOf<Any>()
-                upcomingItems.addAll(assignments.filter { !it.completed && it.dueDate != null && 
-                    it.dueDate >= kotlin.time.Instant.fromEpochMilliseconds(System.currentTimeMillis()) })
-                upcomingItems.addAll(exams.filter { it.isUpcoming })
-                upcomingItems.addAll(projects.filter { !it.completed && it.dueDate != null && 
-                    it.dueDate >= kotlin.time.Instant.fromEpochMilliseconds(System.currentTimeMillis()) })
-                
-                val dashboardData = DashboardData(
-                    assignments = assignments,
-                    exams = exams,
-                    projects = projects,
-                    upcomingItems = upcomingItems.sortedBy { 
-                        when (it) {
-                            is Assignment -> it.dueDate?.toEpochMilliseconds() ?: Long.MAX_VALUE
-                            is Exam -> it.examDate?.toEpochMilliseconds() ?: Long.MAX_VALUE
-                            is Project -> it.dueDate?.toEpochMilliseconds() ?: Long.MAX_VALUE
-                            else -> Long.MAX_VALUE
-                        }
-                    }
+                val now = Clock.System.now()
+                val upcomingAssignments = assignments.filter {
+                    !it.completed && it.dueDate != null && it.dueDate >= now
+                }.take(5)
+                val upcomingExams = exams.filter { it.isUpcoming }.take(5)
+                val upcomingProjects = projects.filter {
+                    !it.completed && it.dueDate != null && it.dueDate >= now
+                }.take(5)
+
+                DashboardUiState.Success(
+                    upcomingAssignments = upcomingAssignments,
+                    upcomingExams = upcomingExams,
+                    upcomingProjects = upcomingProjects
                 )
-                DashboardUiState.Success(dashboardData)
             }
         }
     }.stateIn(
@@ -79,7 +79,7 @@ class DashboardViewModel(
         initialValue = DashboardUiState.Loading
     )
 
-    fun loadAllData() {
+    fun loadDashboardData() {
         viewModelScope.launch {
             assignmentRepository.loadAssignments()
             examRepository.loadExams()

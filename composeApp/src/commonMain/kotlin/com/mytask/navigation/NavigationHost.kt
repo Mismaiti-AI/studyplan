@@ -147,13 +147,14 @@ fun NavigationHost() {
             }
             composable<Settings> {
                 SettingsScreen(
-                    onSheetUrlConfig = { navController.navigate(SheetUrlConfig) },
-                    onBack = { navController.popBackStack() }
+                    onNavigateToSheetConfig = { navController.navigate(SheetUrlConfig) },
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
             composable<SheetUrlConfig> {
                 SheetUrlConfigScreen(
-                    onBack = { navController.popBackStack() }
+                    onNavigateBack = { navController.popBackStack() },
+                    onConfigurationComplete = { navController.popBackStack() }
                 )
             }
         }

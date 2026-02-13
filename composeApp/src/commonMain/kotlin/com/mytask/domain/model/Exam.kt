@@ -1,5 +1,7 @@
 package com.mytask.domain.model
 
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.days
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
@@ -13,14 +15,16 @@ data class Exam(
     val preparationStatus: Boolean = false
 ) {
     val isPast: Boolean
-        get() = examDate != null && examDate < Instant.fromEpochMilliseconds(System.currentTimeMillis())
-    
+        get() = examDate != null && examDate < Clock.System.now()
+
     val isUpcoming: Boolean
-        get() = examDate != null && examDate >= Instant.fromEpochMilliseconds(System.currentTimeMillis())
-    
+        get() = examDate != null && examDate >= Clock.System.now()
+
     val daysUntilExam: Int
         get() = if (examDate != null) {
-            ((examDate.toEpochMilliseconds() - System.currentTimeMillis()) / (24 * 60 * 60 * 1000)).toInt()
+            val now = Clock.System.now()
+            val duration = examDate - now
+            (duration.inWholeDays).toInt()
         } else {
             -1
         }
