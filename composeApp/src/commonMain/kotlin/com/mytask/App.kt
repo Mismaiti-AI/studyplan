@@ -1,19 +1,30 @@
 package com.mytask
-import com.mytask.presentation.theme.AppTheme
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import com.mytask.di.appModule
+import com.mytask.di.databaseModule
+import com.mytask.di.networkModule
+import com.mytask.di.platformModule
+import com.mytask.presentation.navigation.NavigationHost
+import com.mytask.presentation.theme.AppTheme
 import org.koin.compose.KoinApplication
 import org.koin.dsl.KoinAppDeclaration
 
-
 @Composable
 fun App(koinAppDeclaration: KoinAppDeclaration? = null) {
-    KoinApplication(application = {
-        modules(listOf())
-        koinAppDeclaration?.invoke(this)
-    }) {
+    KoinApplication(
+        application = {
+            modules(
+                appModule,
+                networkModule,
+                databaseModule,
+                platformModule()
+            )
+            koinAppDeclaration?.invoke(this)
+        }
+    ) {
         AppTheme {
-            // TBD: set content here
+            NavigationHost()
         }
     }
 }

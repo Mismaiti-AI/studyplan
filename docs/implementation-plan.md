@@ -62,12 +62,12 @@ Each phase lists its relevant skills — patterns are available in the system pr
 
 **Tasks:**
 **Update existing theme files (already in template):**
-- [ ] `composeApp/src/commonMain/kotlin/{{package}}/presentation/theme/AppColors.kt` - Update color values from ui_design
-- [ ] `composeApp/src/commonMain/kotlin/{{package}}/presentation/theme/AppTheme.kt` - Update MaterialTheme with new colors
-- [ ] `composeApp/src/androidMain/kotlin/{{package}}/presentation/theme/AppTheme.android.kt` - Platform-specific (already exists)
-- [ ] `composeApp/src/iosMain/kotlin/{{package}}/presentation/theme/AppTheme.ios.kt` - Platform-specific (already exists)
-- [ ] Apply colors from project-context.json ui_design section
-- [ ] Ensure dark color scheme is properly configured
+- [x] `composeApp/src/commonMain/kotlin/{{package}}/presentation/theme/AppColors.kt` - Update color values from ui_design
+- [x] `composeApp/src/commonMain/kotlin/{{package}}/presentation/theme/AppTheme.kt` - Update MaterialTheme with new colors
+- [x] `composeApp/src/androidMain/kotlin/{{package}}/presentation/theme/AppTheme.android.kt` - Platform-specific (already exists)
+- [x] `composeApp/src/iosMain/kotlin/{{package}}/presentation/theme/AppTheme.ios.kt` - Platform-specific (already exists)
+- [x] Apply colors from project-context.json ui_design section
+- [x] Ensure dark color scheme is properly configured
 
 ---
 
@@ -81,10 +81,10 @@ Each phase lists its relevant skills — patterns are available in the system pr
 **📖 Read entity specifications from `project-context.json → data_models`**
 
 **Create Domain Models in `composeApp/src/commonMain/kotlin/{{package}}/domain/model/`:**
-- [ ] `Assignment.kt` (6 fields - see context.json)
-- [ ] `Exam.kt` (5 fields - see context.json)
-- [ ] `Project.kt` (7 fields - see context.json)
-- [ ] `AppConfig.kt` (3 fields - see context.json)
+- [x] `Assignment.kt` (6 fields - see context.json)
+- [x] `Exam.kt` (5 fields - see context.json)
+- [x] `Project.kt` (7 fields - see context.json)
+- [x] `AppConfig.kt` (3 fields - see context.json)
 
 **Implementation Rules:**
   - Use `kotlin.time.Instant` for timestamps (NOT kotlinx.datetime)
@@ -106,18 +106,18 @@ Each phase lists its relevant skills — patterns are available in the system pr
 
 **Tasks:**
 **Core Infrastructure:**
-- [ ] `composeApp/src/commonMain/kotlin/{{package}}/core/network/ApiResult.kt` - Sealed class with Success<T>/Error variants (used by all repositories)
+- [x] `composeApp/src/commonMain/kotlin/{{package}}/core/network/ApiResult.kt` - Sealed class with Success<T>/Error variants (used by all repositories)
 
 **Google Sheets Infrastructure (gsheet-skill patterns):**
 
 *Configuration (read `backend_config.config` for mode):*
-- [ ] `composeApp/src/commonMain/kotlin/{{package}}/core/config/SheetsApiConfig.kt` - script_url, spreadsheet_url from backend_config
+- [x] `composeApp/src/commonMain/kotlin/{{package}}/core/config/SheetsApiConfig.kt` - script_url, spreadsheet_url from backend_config
   - If `config_type == "hardcoded"`: Use `object` with `const val`
   - If `config_type == "configurable"`: Use `class` with AppSettings injection
 
 *Service & Models:*
-- [ ] `composeApp/src/commonMain/kotlin/{{package}}/data/remote/model/SheetsApiModels.kt` - SheetsRequest, SheetsResponse, InsertResponse, SchemaResponse
-- [ ] `composeApp/src/commonMain/kotlin/{{package}}/data/remote/service/SheetsApiService.kt` - 7 actions: PING, GET, GET_BY_ID, INSERT, UPDATE, DELETE, GET_SCHEMA
+- [x] `composeApp/src/commonMain/kotlin/{{package}}/data/remote/model/SheetsApiModels.kt` - SheetsRequest, SheetsResponse, InsertResponse, SchemaResponse
+- [x] `composeApp/src/commonMain/kotlin/{{package}}/data/remote/service/SheetsApiService.kt` - 7 actions: PING, GET, GET_BY_ID, INSERT, UPDATE, DELETE, GET_SCHEMA
   - Support both edit URLs and published URLs (pubhtml)
   - Implement multi-format date parsing (yyyy-MM-dd, yyyy/MM/dd, dd/MM/yyyy)
   - Add CSV response validation (check for HTML error pages)
@@ -125,25 +125,25 @@ Each phase lists its relevant skills — patterns are available in the system pr
 **Create Room Database (database-skill patterns):**
 
 *Database Constructor (REQUIRED for Room KMP):*
-- [ ] `composeApp/src/commonMain/kotlin/{{package}}/core/database/AppDatabaseConstructor.kt` - `expect object AppDatabaseConstructor : RoomDatabaseConstructor<AppDatabase>` with `@Suppress("NO_ACTUAL_FOR_EXPECT")`
+- [x] `composeApp/src/commonMain/kotlin/{{package}}/core/database/AppDatabaseConstructor.kt` - `expect object AppDatabaseConstructor : RoomDatabaseConstructor<AppDatabase>` with `@Suppress("NO_ACTUAL_FOR_EXPECT")`
 
 *Database Class:*
-- [ ] `composeApp/src/commonMain/kotlin/{{package}}/core/database/AppDatabase.kt` - Room @Database with `@ConstructedBy(AppDatabaseConstructor::class)`
+- [x] `composeApp/src/commonMain/kotlin/{{package}}/core/database/AppDatabase.kt` - Room @Database with `@ConstructedBy(AppDatabaseConstructor::class)`
 
 *Database Module (expect/actual for platform-specific Room builder):*
-- [ ] `composeApp/src/commonMain/kotlin/{{package}}/di/DatabaseModule.kt` - `expect fun appDatabaseModule(): Module`
-- [ ] `composeApp/src/androidMain/kotlin/{{package}}/di/DatabaseModule.android.kt` - Room.databaseBuilder with `setDriver(BundledSQLiteDriver())` + `setQueryCoroutineContext(Dispatchers.IO)`
-- [ ] `composeApp/src/iosMain/kotlin/{{package}}/di/DatabaseModule.ios.kt` - Room.databaseBuilder with NSDocumentDirectory path + `setDriver(BundledSQLiteDriver())` + `setQueryCoroutineContext(Dispatchers.IO)`
+- [x] `composeApp/src/commonMain/kotlin/{{package}}/di/DatabaseModule.kt` - `expect fun appDatabaseModule(): Module`
+- [x] `composeApp/src/androidMain/kotlin/{{package}}/di/DatabaseModule.android.kt` - Room.databaseBuilder with `setDriver(BundledSQLiteDriver())` + `setQueryCoroutineContext(Dispatchers.IO)`
+- [x] `composeApp/src/iosMain/kotlin/{{package}}/di/DatabaseModule.ios.kt` - Room.databaseBuilder with NSDocumentDirectory path + `setDriver(BundledSQLiteDriver())` + `setQueryCoroutineContext(Dispatchers.IO)`
 
 *Entities and DAOs:*
-- [ ] `composeApp/src/commonMain/kotlin/{package}/data/local/entity/AssignmentEntity.kt` - Room @Entity
-- [ ] `composeApp/src/commonMain/kotlin/{package}/data/local/dao/AssignmentDao.kt` - Room @Dao with CRUD
-- [ ] `composeApp/src/commonMain/kotlin/{package}/data/local/entity/ExamEntity.kt` - Room @Entity
-- [ ] `composeApp/src/commonMain/kotlin/{package}/data/local/dao/ExamDao.kt` - Room @Dao with CRUD
-- [ ] `composeApp/src/commonMain/kotlin/{package}/data/local/entity/ProjectEntity.kt` - Room @Entity
-- [ ] `composeApp/src/commonMain/kotlin/{package}/data/local/dao/ProjectDao.kt` - Room @Dao with CRUD
-- [ ] `composeApp/src/commonMain/kotlin/{package}/data/local/entity/AppConfigEntity.kt` - Room @Entity
-- [ ] `composeApp/src/commonMain/kotlin/{package}/data/local/dao/AppConfigDao.kt` - Room @Dao with CRUD
+- [x] `composeApp/src/commonMain/kotlin/{package}/data/local/entity/AssignmentEntity.kt` - Room @Entity
+- [x] `composeApp/src/commonMain/kotlin/{package}/data/local/dao/AssignmentDao.kt` - Room @Dao with CRUD
+- [x] `composeApp/src/commonMain/kotlin/{package}/data/local/entity/ExamEntity.kt` - Room @Entity
+- [x] `composeApp/src/commonMain/kotlin/{package}/data/local/dao/ExamDao.kt` - Room @Dao with CRUD
+- [x] `composeApp/src/commonMain/kotlin/{package}/data/local/entity/ProjectEntity.kt` - Room @Entity
+- [x] `composeApp/src/commonMain/kotlin/{package}/data/local/dao/ProjectDao.kt` - Room @Dao with CRUD
+- [x] `composeApp/src/commonMain/kotlin/{package}/data/local/entity/AppConfigEntity.kt` - Room @Entity
+- [x] `composeApp/src/commonMain/kotlin/{package}/data/local/dao/AppConfigDao.kt` - Room @Dao with CRUD
   - Store timestamps as Long (not Instant) in entities
   - Add entity mappers: `{Entity}Entity.toDomain()` and `{Entity}.toEntity()`
 **Create Repositories (with STATE MANAGEMENT):**
@@ -155,14 +155,14 @@ Both interface and implementation go in the SAME folder: `data/repositories/{fea
   - NEVER put the implementation class inside the interface file
   - NEVER define the same class in both files (causes Redeclaration error)
 
-- [ ] `composeApp/src/commonMain/kotlin/{package}/data/repositories/appconfig/AppConfigRepository.kt` (interface ONLY)
-- [ ] `composeApp/src/commonMain/kotlin/{package}/data/repositories/appconfig/AppConfigRepositoryImpl.kt` (implementation ONLY)
-- [ ] `composeApp/src/commonMain/kotlin/{package}/data/repositories/assignment/AssignmentRepository.kt` (interface ONLY)
-- [ ] `composeApp/src/commonMain/kotlin/{package}/data/repositories/assignment/AssignmentRepositoryImpl.kt` (implementation ONLY)
-- [ ] `composeApp/src/commonMain/kotlin/{package}/data/repositories/exam/ExamRepository.kt` (interface ONLY)
-- [ ] `composeApp/src/commonMain/kotlin/{package}/data/repositories/exam/ExamRepositoryImpl.kt` (implementation ONLY)
-- [ ] `composeApp/src/commonMain/kotlin/{package}/data/repositories/project/ProjectRepository.kt` (interface ONLY)
-- [ ] `composeApp/src/commonMain/kotlin/{package}/data/repositories/project/ProjectRepositoryImpl.kt` (implementation ONLY)
+- [x] `composeApp/src/commonMain/kotlin/{package}/data/repositories/appconfig/AppConfigRepository.kt` (interface ONLY)
+- [x] `composeApp/src/commonMain/kotlin/{package}/data/repositories/appconfig/AppConfigRepositoryImpl.kt` (implementation ONLY)
+- [x] `composeApp/src/commonMain/kotlin/{package}/data/repositories/assignment/AssignmentRepository.kt` (interface ONLY)
+- [x] `composeApp/src/commonMain/kotlin/{package}/data/repositories/assignment/AssignmentRepositoryImpl.kt` (implementation ONLY)
+- [x] `composeApp/src/commonMain/kotlin/{package}/data/repositories/exam/ExamRepository.kt` (interface ONLY)
+- [x] `composeApp/src/commonMain/kotlin/{package}/data/repositories/exam/ExamRepositoryImpl.kt` (implementation ONLY)
+- [x] `composeApp/src/commonMain/kotlin/{package}/data/repositories/project/ProjectRepository.kt` (interface ONLY)
+- [x] `composeApp/src/commonMain/kotlin/{package}/data/repositories/project/ProjectRepositoryImpl.kt` (implementation ONLY)
 
 **Google Sheets Repository Pattern (NO Room/DAO methods):**
   - Constructor: `class XxxRepositoryImpl(private val sheetsApi: SheetsApiService) : XxxRepository`
@@ -186,18 +186,18 @@ Both interface and implementation go in the SAME folder: `data/repositories/{fea
 
 **Tasks:**
 **Create Use Cases in `composeApp/src/commonMain/kotlin/{{package}}/domain/usecase/`:**
-- [ ] `composeApp/src/commonMain/kotlin/{package}/domain/usecase/GetAssignmentListUseCase.kt` (feature: Assignment Tracking)
-- [ ] `composeApp/src/commonMain/kotlin/{package}/domain/usecase/MarkAssignmentCompleteUseCase.kt` (feature: Assignment Tracking)
-- [ ] `composeApp/src/commonMain/kotlin/{package}/domain/usecase/ViewAssignmentDetailsUseCase.kt` (feature: Assignment Tracking)
-- [ ] `composeApp/src/commonMain/kotlin/{package}/domain/usecase/GetExamListUseCase.kt` (feature: Exam Tracking)
-- [ ] `composeApp/src/commonMain/kotlin/{package}/domain/usecase/ViewExamDetailsUseCase.kt` (feature: Exam Tracking)
-- [ ] `composeApp/src/commonMain/kotlin/{package}/domain/usecase/GetProjectListUseCase.kt` (feature: Project Tracking)
-- [ ] `composeApp/src/commonMain/kotlin/{package}/domain/usecase/ViewProjectDetailsUseCase.kt` (feature: Project Tracking)
-- [ ] `composeApp/src/commonMain/kotlin/{package}/domain/usecase/GetDashboardOverviewUseCase.kt` (feature: Dashboard Overview)
-- [ ] `composeApp/src/commonMain/kotlin/{package}/domain/usecase/GetUpcomingItemsUseCase.kt` (feature: Dashboard Overview)
-- [ ] `composeApp/src/commonMain/kotlin/{package}/domain/usecase/UpdateGoogleSheetUrlUseCase.kt` (feature: Google Sheets Configuration)
-- [ ] `composeApp/src/commonMain/kotlin/{package}/domain/usecase/ValidateSheetUrlUseCase.kt` (feature: Google Sheets Configuration)
-- [ ] `composeApp/src/commonMain/kotlin/{package}/domain/usecase/GetCurrentSheetConfigUseCase.kt` (feature: Google Sheets Configuration)
+- [x] `composeApp/src/commonMain/kotlin/{package}/domain/usecase/GetAssignmentListUseCase.kt` (feature: Assignment Tracking)
+- [x] `composeApp/src/commonMain/kotlin/{package}/domain/usecase/MarkAssignmentCompleteUseCase.kt` (feature: Assignment Tracking)
+- [x] `composeApp/src/commonMain/kotlin/{package}/domain/usecase/ViewAssignmentDetailsUseCase.kt` (feature: Assignment Tracking)
+- [x] `composeApp/src/commonMain/kotlin/{package}/domain/usecase/GetExamListUseCase.kt` (feature: Exam Tracking)
+- [x] `composeApp/src/commonMain/kotlin/{package}/domain/usecase/ViewExamDetailsUseCase.kt` (feature: Exam Tracking)
+- [x] `composeApp/src/commonMain/kotlin/{package}/domain/usecase/GetProjectListUseCase.kt` (feature: Project Tracking)
+- [x] `composeApp/src/commonMain/kotlin/{package}/domain/usecase/ViewProjectDetailsUseCase.kt` (feature: Project Tracking)
+- [x] `composeApp/src/commonMain/kotlin/{package}/domain/usecase/GetDashboardOverviewUseCase.kt` (feature: Dashboard Overview)
+- [x] `composeApp/src/commonMain/kotlin/{package}/domain/usecase/GetUpcomingItemsUseCase.kt` (feature: Dashboard Overview)
+- [x] `composeApp/src/commonMain/kotlin/{package}/domain/usecase/UpdateGoogleSheetUrlUseCase.kt` (feature: Google Sheets Configuration)
+- [x] `composeApp/src/commonMain/kotlin/{package}/domain/usecase/ValidateSheetUrlUseCase.kt` (feature: Google Sheets Configuration)
+- [x] `composeApp/src/commonMain/kotlin/{package}/domain/usecase/GetCurrentSheetConfigUseCase.kt` (feature: Google Sheets Configuration)
 
 **Implementation Rules:**
   - Each UseCase: single `operator fun invoke()` or `suspend operator fun invoke()`
@@ -230,15 +230,15 @@ class GetAssignmentListUseCase(
 
 **Tasks:**
 **Create ViewModels (feature-based organization):**
-- [ ] `composeApp/src/commonMain/kotlin/{package}/presentation/assignmentdetail/AssignmentDetailViewModel.kt` with `AssignmentDetailUiState` sealed interface
-- [ ] `composeApp/src/commonMain/kotlin/{package}/presentation/assignmentlist/AssignmentListViewModel.kt` with `AssignmentListUiState` sealed interface
-- [ ] `composeApp/src/commonMain/kotlin/{package}/presentation/dashboard/DashboardViewModel.kt` with `DashboardUiState` sealed interface
-- [ ] `composeApp/src/commonMain/kotlin/{package}/presentation/examdetail/ExamDetailViewModel.kt` with `ExamDetailUiState` sealed interface
-- [ ] `composeApp/src/commonMain/kotlin/{package}/presentation/examlist/ExamListViewModel.kt` with `ExamListUiState` sealed interface
-- [ ] `composeApp/src/commonMain/kotlin/{package}/presentation/projectdetail/ProjectDetailViewModel.kt` with `ProjectDetailUiState` sealed interface
-- [ ] `composeApp/src/commonMain/kotlin/{package}/presentation/projectlist/ProjectListViewModel.kt` with `ProjectListUiState` sealed interface
-- [ ] `composeApp/src/commonMain/kotlin/{package}/presentation/settings/SettingsViewModel.kt` with `SettingsUiState` sealed interface
-- [ ] `composeApp/src/commonMain/kotlin/{package}/presentation/sheeturlconfig/SheetUrlConfigViewModel.kt` with `SheetUrlConfigUiState` sealed interface
+- [x] `composeApp/src/commonMain/kotlin/{package}/presentation/assignmentdetail/AssignmentDetailViewModel.kt` with `AssignmentDetailUiState` sealed interface
+- [x] `composeApp/src/commonMain/kotlin/{package}/presentation/assignmentlist/AssignmentListViewModel.kt` with `AssignmentListUiState` sealed interface
+- [x] `composeApp/src/commonMain/kotlin/{package}/presentation/dashboard/DashboardViewModel.kt` with `DashboardUiState` sealed interface
+- [x] `composeApp/src/commonMain/kotlin/{package}/presentation/examdetail/ExamDetailViewModel.kt` with `ExamDetailUiState` sealed interface
+- [x] `composeApp/src/commonMain/kotlin/{package}/presentation/examlist/ExamListViewModel.kt` with `ExamListUiState` sealed interface
+- [x] `composeApp/src/commonMain/kotlin/{package}/presentation/projectdetail/ProjectDetailViewModel.kt` with `ProjectDetailUiState` sealed interface
+- [x] `composeApp/src/commonMain/kotlin/{package}/presentation/projectlist/ProjectListViewModel.kt` with `ProjectListUiState` sealed interface
+- [x] `composeApp/src/commonMain/kotlin/{package}/presentation/settings/SettingsViewModel.kt` with `SettingsUiState` sealed interface
+- [x] `composeApp/src/commonMain/kotlin/{package}/presentation/sheeturlconfig/SheetUrlConfigViewModel.kt` with `SheetUrlConfigUiState` sealed interface
 
 **THIN ViewModel Sample (FOLLOW THIS PATTERN):**
 ```kotlin
@@ -289,20 +289,20 @@ class EventsViewModel(
 
 **Tasks:**
 **Create Shared UI Components FIRST (ui-skill patterns):**
-- [ ] `composeApp/src/commonMain/kotlin/{{package}}/presentation/components/LoadingIndicator.kt` — Centered `CircularProgressIndicator`
-- [ ] `composeApp/src/commonMain/kotlin/{{package}}/presentation/components/ErrorMessage.kt` — Error text + Retry button
-- [ ] `composeApp/src/commonMain/kotlin/{{package}}/presentation/components/EmptyState.kt` — Icon + message + optional action button for empty lists
+- [x] `composeApp/src/commonMain/kotlin/{{package}}/presentation/components/LoadingIndicator.kt` — Centered `CircularProgressIndicator`
+- [x] `composeApp/src/commonMain/kotlin/{{package}}/presentation/components/ErrorMessage.kt` — Error text + Retry button
+- [x] `composeApp/src/commonMain/kotlin/{{package}}/presentation/components/EmptyState.kt` — Icon + message + optional action button for empty lists
 
 **Create Screens (feature-based organization):**
-- [ ] `composeApp/src/commonMain/kotlin/{package}/presentation/assignmentdetail/AssignmentDetailScreen.kt` using `AssignmentDetailViewModel`
-- [ ] `composeApp/src/commonMain/kotlin/{package}/presentation/assignmentlist/AssignmentListScreen.kt` using `AssignmentListViewModel`
-- [ ] `composeApp/src/commonMain/kotlin/{package}/presentation/dashboard/DashboardScreen.kt` using `DashboardViewModel`
-- [ ] `composeApp/src/commonMain/kotlin/{package}/presentation/examdetail/ExamDetailScreen.kt` using `ExamDetailViewModel`
-- [ ] `composeApp/src/commonMain/kotlin/{package}/presentation/examlist/ExamListScreen.kt` using `ExamListViewModel`
-- [ ] `composeApp/src/commonMain/kotlin/{package}/presentation/projectdetail/ProjectDetailScreen.kt` using `ProjectDetailViewModel`
-- [ ] `composeApp/src/commonMain/kotlin/{package}/presentation/projectlist/ProjectListScreen.kt` using `ProjectListViewModel`
-- [ ] `composeApp/src/commonMain/kotlin/{package}/presentation/settings/SettingsScreen.kt` using `SettingsViewModel`
-- [ ] `composeApp/src/commonMain/kotlin/{package}/presentation/sheeturlconfig/SheetUrlConfigScreen.kt` using `SheetUrlConfigViewModel`
+- [x] `composeApp/src/commonMain/kotlin/{package}/presentation/assignmentdetail/AssignmentDetailScreen.kt` using `AssignmentDetailViewModel`
+- [x] `composeApp/src/commonMain/kotlin/{package}/presentation/assignmentlist/AssignmentListScreen.kt` using `AssignmentListViewModel`
+- [x] `composeApp/src/commonMain/kotlin/{package}/presentation/dashboard/DashboardScreen.kt` using `DashboardViewModel`
+- [x] `composeApp/src/commonMain/kotlin/{package}/presentation/examdetail/ExamDetailScreen.kt` using `ExamDetailViewModel`
+- [x] `composeApp/src/commonMain/kotlin/{package}/presentation/examlist/ExamListScreen.kt` using `ExamListViewModel`
+- [x] `composeApp/src/commonMain/kotlin/{package}/presentation/projectdetail/ProjectDetailScreen.kt` using `ProjectDetailViewModel`
+- [x] `composeApp/src/commonMain/kotlin/{package}/presentation/projectlist/ProjectListScreen.kt` using `ProjectListViewModel`
+- [x] `composeApp/src/commonMain/kotlin/{package}/presentation/settings/SettingsScreen.kt` using `SettingsViewModel`
+- [x] `composeApp/src/commonMain/kotlin/{package}/presentation/sheeturlconfig/SheetUrlConfigScreen.kt` using `SheetUrlConfigViewModel`
 
 **IMPORTANT: Do NOT create separate UiState files — UiState is defined in the ViewModel file.**
 
@@ -320,7 +320,7 @@ class EventsViewModel(
 **Bottom Navigation Items:** Dashboard, Assignments, Exams, Projects
 
 **Create Splash Screen:**
-- [ ] `composeApp/src/commonMain/kotlin/{{package}}/presentation/splash/SplashScreen.kt` - Full-screen branding display
+- [x] `composeApp/src/commonMain/kotlin/{{package}}/presentation/splash/SplashScreen.kt` - Full-screen branding display
   - Branding text: "MyTask"
   - Show app logo/icon centered with branding text below
   - Use primary color as background
@@ -352,8 +352,8 @@ class EventsViewModel(
 
 **Tasks:**
 **Create Navigation in `composeApp/src/commonMain/kotlin/{{package}}/navigation/`:**
-- [ ] `composeApp/src/commonMain/kotlin/{{package}}/navigation/NavRoutes.kt` - @Serializable route classes (NOT string routes)
-- [ ] `composeApp/src/commonMain/kotlin/{{package}}/navigation/NavigationHost.kt` - NavHost with composable<Route> entries
+- [x] `composeApp/src/commonMain/kotlin/{{package}}/navigation/NavRoutes.kt` - @Serializable route classes (NOT string routes)
+- [x] `composeApp/src/commonMain/kotlin/{{package}}/navigation/NavigationHost.kt` - NavHost with composable<Route> entries
   - Start destination: `Splash`
 
 **CRITICAL: Create ONLY these 2 navigation files. Do NOT create:**
@@ -376,9 +376,9 @@ class EventsViewModel(
   - The function MUST have the @Composable annotation
 
 **Splash Screen Navigation:**
-- [ ] Add `@Serializable object Splash` route
-- [ ] Splash navigates to `ConfigScreen` after delay
-- [ ] Use `navController.navigate(route) {{ popUpTo(Splash) {{ inclusive = true }} }}` to remove splash from backstack
+- [x] Add `@Serializable object Splash` route
+- [x] Splash navigates to `ConfigScreen` after delay
+- [x] Use `navController.navigate(route) {{ popUpTo(Splash) {{ inclusive = true }} }}` to remove splash from backstack
 **Navigation Flows:**
   - ConfigScreen -> DashboardScreen (after successful configuration)
   - DashboardScreen -> AssignmentListScreen (tap assignments section)
@@ -404,15 +404,15 @@ For setup screens: check existing state in ViewModel init (skip if data exists)
 
 **Tasks:**
 **Create Koin Modules in `composeApp/src/commonMain/kotlin/{{package}}/di/`:**
-- [ ] `composeApp/src/commonMain/kotlin/{{package}}/di/AppModule.kt` - main module with all registrations
-- [ ] `composeApp/src/commonMain/kotlin/{{package}}/di/PlatformModule.kt` - expect fun platformModule(): Module
-- [ ] `composeApp/src/androidMain/kotlin/{{package}}/di/PlatformModule.android.kt` - actual fun platformModule(): Module
-- [ ] `composeApp/src/iosMain/kotlin/{{package}}/di/PlatformModule.ios.kt` - actual fun platformModule(): Module
+- [x] `composeApp/src/commonMain/kotlin/{{package}}/di/AppModule.kt` - main module with all registrations
+- [x] `composeApp/src/commonMain/kotlin/{{package}}/di/PlatformModule.kt` - expect fun platformModule(): Module
+- [x] `composeApp/src/androidMain/kotlin/{{package}}/di/PlatformModule.android.kt` - actual fun platformModule(): Module
+- [x] `composeApp/src/iosMain/kotlin/{{package}}/di/PlatformModule.ios.kt` - actual fun platformModule(): Module
 
 **AppSettings (key-value storage for user preferences):**
-- [ ] `composeApp/src/commonMain/kotlin/{{package}}/core/settings/AppSettings.kt` - Interface with getString/putString/getBoolean/putBoolean/remove
-- [ ] `composeApp/src/androidMain/kotlin/{{package}}/core/settings/AndroidAppSettings.kt` - SharedPreferences implementation
-- [ ] `composeApp/src/iosMain/kotlin/{{package}}/core/settings/IosAppSettings.kt` - NSUserDefaults implementation
+- [x] `composeApp/src/commonMain/kotlin/{{package}}/core/settings/AppSettings.kt` - Interface with getString/putString/getBoolean/putBoolean/remove
+- [x] `composeApp/src/androidMain/kotlin/{{package}}/core/settings/AndroidAppSettings.kt` - SharedPreferences implementation
+- [x] `composeApp/src/iosMain/kotlin/{{package}}/core/settings/IosAppSettings.kt` - NSUserDefaults implementation
   - Register in platformModule: `single<AppSettings> { AndroidAppSettings(get()) }` / `single<AppSettings> { IosAppSettings() }`
 
 **Register ALL classes created in previous phases:**
@@ -466,7 +466,7 @@ For setup screens: check existing state in ViewModel init (skip if data exists)
   - Example: `interface DateFormatter` → `AndroidDateFormatter` / `IosDateFormatter`
 
 **CRITICAL: Update App.kt to wire everything together:**
-- [ ] Update `composeApp/src/commonMain/kotlin/{{package}}/App.kt`:
+- [x] Update `composeApp/src/commonMain/kotlin/{{package}}/App.kt`:
   - Replace `modules(listOf())` with `modules(listOf(appModule, platformModule()))`
   - Replace `// TBD: set content here` with `NavigationHost()` call
   - Add imports for `appModule`, `platformModule`, and `NavigationHost`
