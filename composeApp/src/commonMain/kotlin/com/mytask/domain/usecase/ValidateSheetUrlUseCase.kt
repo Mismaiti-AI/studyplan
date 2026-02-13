@@ -7,7 +7,7 @@ class ValidateSheetUrlUseCase(
 ) {
     suspend operator fun invoke(url: String): Result<Boolean> {
         return try {
-            val isValid = sheetsApiService.validateUrl(url)
+            val isValid = sheetsApiService.ping()
             Result.success(isValid)
         } catch (e: Exception) {
             Result.failure(e)

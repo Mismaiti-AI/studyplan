@@ -30,6 +30,7 @@ import com.mytask.presentation.projectlist.ProjectListViewModel
 import com.mytask.presentation.settings.SettingsViewModel
 import com.mytask.presentation.sheeturlconfig.SheetUrlConfigViewModel
 import org.koin.compose.viewmodel.dsl.viewModel
+import org.koin.compose.viewmodel.dsl.viewModelOf
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind

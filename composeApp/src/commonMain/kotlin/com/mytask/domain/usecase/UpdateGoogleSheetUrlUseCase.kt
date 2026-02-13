@@ -7,19 +7,15 @@ class UpdateGoogleSheetUrlUseCase(
     private val repository: AppConfigRepository
 ) {
     suspend operator fun invoke(newUrl: String): Result<Unit> {
-        val currentConfig = repository.getConfig()
-        val updatedConfig = if (currentConfig != null) {
-            currentConfig.copy(
-                googleSheetsUrl = newUrl
-            )
-        } else {
-            AppConfig(
-                googleSheetsUrl = newUrl,
-                createdAt = kotlin.time.Clock.System.now(),
-                updatedAt = kotlin.time.Clock.System.now()
-            )
+        return try {
+            val success = repository.updateGoogleSheetUrl(newUrl)
+            if (success) {
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("Failed to update sheet URL"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
         }
-        
-        return repository.saveConfig(updatedConfig)
     }
 }

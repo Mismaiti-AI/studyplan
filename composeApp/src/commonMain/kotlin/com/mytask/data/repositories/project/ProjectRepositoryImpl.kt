@@ -49,8 +49,7 @@ class ProjectRepositoryImpl(
         _isLoading.value = true
         _error.value = null
         return try {
-            val entities = projectDao.getAllOnce()
-            entities.map { it.toDomain() }
+            projects.value
         } catch (e: Exception) {
             _error.value = e.message ?: "Unknown error loading projects"
             emptyList()

@@ -51,8 +51,7 @@ class AssignmentRepositoryImpl(
         return try {
             // In a real implementation, this would fetch from Google Sheets
             // For now, we'll just return the locally stored assignments
-            val entities = assignmentDao.getAllOnce()
-            entities.map { it.toDomain() }
+            assignments.value
         } catch (e: Exception) {
             _error.value = e.message ?: "Unknown error loading assignments"
             emptyList()

@@ -49,8 +49,7 @@ class ExamRepositoryImpl(
         _isLoading.value = true
         _error.value = null
         return try {
-            val entities = examDao.getAllOnce()
-            entities.map { it.toDomain() }
+            exams.value
         } catch (e: Exception) {
             _error.value = e.message ?: "Unknown error loading exams"
             emptyList()

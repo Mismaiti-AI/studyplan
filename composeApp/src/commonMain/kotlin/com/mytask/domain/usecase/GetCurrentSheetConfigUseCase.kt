@@ -7,6 +7,6 @@ class GetCurrentSheetConfigUseCase(
     private val repository: AppConfigRepository
 ) {
     suspend operator fun invoke(): AppConfig? {
-        return repository.getConfig()
+        return repository.config.value
     }
 }

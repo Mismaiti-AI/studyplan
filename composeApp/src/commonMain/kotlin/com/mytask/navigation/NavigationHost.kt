@@ -108,38 +108,41 @@ fun NavigationHost() {
             }
             composable<Assignments> {
                 AssignmentListScreen(
-                    onAssignmentClick = { id -> navController.navigate(AssignmentDetail(id)) }
+                    onAssignmentClick = { id -> navController.navigate(AssignmentDetail(id)) },
+                    onAddAssignment = { /* TODO: Add assignment screen */ }
                 )
             }
             composable<AssignmentDetail> { backStackEntry ->
                 val route = backStackEntry.toRoute<AssignmentDetail>()
                 AssignmentDetailScreen(
                     assignmentId = route.assignmentId,
-                    onBack = { navController.popBackStack() }
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
             composable<Exams> {
                 ExamListScreen(
-                    onExamClick = { id -> navController.navigate(ExamDetail(id)) }
+                    onExamClick = { id -> navController.navigate(ExamDetail(id)) },
+                    onAddExam = { /* TODO: Add exam screen */ }
                 )
             }
             composable<ExamDetail> { backStackEntry ->
                 val route = backStackEntry.toRoute<ExamDetail>()
                 ExamDetailScreen(
                     examId = route.examId,
-                    onBack = { navController.popBackStack() }
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
             composable<Projects> {
                 ProjectListScreen(
-                    onProjectClick = { id -> navController.navigate(ProjectDetail(id)) }
+                    onProjectClick = { id -> navController.navigate(ProjectDetail(id)) },
+                    onAddProject = { /* TODO: Add project screen */ }
                 )
             }
             composable<ProjectDetail> { backStackEntry ->
                 val route = backStackEntry.toRoute<ProjectDetail>()
                 ProjectDetailScreen(
                     projectId = route.projectId,
-                    onBack = { navController.popBackStack() }
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
             composable<Settings> {
