@@ -1,4 +1,5 @@
-package com.mismaiti
+package com.mytask
+import com.mytask.presentation.theme.AppTheme
 
 import androidx.compose.runtime.*
 import org.koin.compose.KoinApplication

@@ -1,4 +1,4 @@
-rootProject.name = "Mismaiti-Template"
+rootProject.name = "StudyPlan"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {

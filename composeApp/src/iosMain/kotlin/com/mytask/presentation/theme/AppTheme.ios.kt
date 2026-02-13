@@ -1,4 +1,4 @@
-package com.mismaiti
+package com.mytask.presentation.theme
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
