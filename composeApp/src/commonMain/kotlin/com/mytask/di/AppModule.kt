@@ -57,27 +57,31 @@ val appModule = module {
     factoryOf(::ValidateSheetUrlUseCase)
     factoryOf(::GetCurrentSheetConfigUseCase)
 
-    // ViewModels
+    // ViewModels - Simple ones without parameters
     viewModelOf(::AssignmentListViewModel)
-    viewModelOf(::AssignmentDetailViewModel)
     viewModelOf(::ExamListViewModel)
-    viewModelOf(::ExamDetailViewModel)
     viewModelOf(::ProjectListViewModel)
-    viewModelOf(::ProjectDetailViewModel)
     viewModelOf(::DashboardViewModel)
     viewModelOf(::SettingsViewModel)
     viewModelOf(::SheetUrlConfigViewModel)
-}
 
-// Register ViewModels with explicit function since viewModelOf might not work for all cases
-val viewModelModule = module {
-    viewModel { AssignmentListViewModel(get()) }
-    viewModel { AssignmentDetailViewModel(get()) }
-    viewModel { ExamListViewModel(get()) }
-    viewModel { ExamDetailViewModel(get()) }
-    viewModel { ProjectListViewModel(get()) }
-    viewModel { ProjectDetailViewModel(get()) }
-    viewModel { DashboardViewModel(get(), get(), get()) }
-    viewModel { SettingsViewModel(get()) }
-    viewModel { SheetUrlConfigViewModel(get(), get()) }
+    // ViewModels with parameters registered via viewModel { params -> }
+    viewModel { params ->
+        com.mytask.presentation.assignmentdetail.AssignmentDetailViewModel(
+            assignmentId = params.get(),
+            assignmentRepository = get()
+        )
+    }
+    viewModel { params ->
+        ExamDetailViewModel(
+            examId = params.get(),
+            examRepository = get()
+        )
+    }
+    viewModel { params ->
+        com.mytask.presentation.projectdetail.ProjectDetailViewModel(
+            projectId = params.get(),
+            projectRepository = get()
+        )
+    }
 }

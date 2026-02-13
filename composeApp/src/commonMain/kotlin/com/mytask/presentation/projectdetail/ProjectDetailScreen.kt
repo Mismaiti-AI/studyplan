@@ -46,7 +46,7 @@ fun ProjectDetailScreen(
         is ProjectDetailUiState.Error -> {
             ErrorMessage(
                 message = state.message,
-                onRetry = { viewModel.loadProject() }
+                onRetry = { viewModel.loadProject(projectId) }
             )
         }
         is ProjectDetailUiState.Success -> {

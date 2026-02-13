@@ -41,21 +41,25 @@ fun SheetUrlConfigScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     when (val state = uiState) {
+        is SheetUrlConfigUiState.Idle -> {
+            SheetUrlConfigContent(
+                currentUrl = viewModel.currentUrl.collectAsState().value,
+                onSave = { url -> viewModel.updateUrl(url); viewModel.saveUrl() },
+                onNavigateBack = onNavigateBack
+            )
+        }
         is SheetUrlConfigUiState.Loading -> {
             LoadingIndicator()
         }
         is SheetUrlConfigUiState.Error -> {
-            ErrorMessage(
-                message = state.message,
-                onRetry = { /* Retry handled by user actions */ }
+            SheetUrlConfigContent(
+                currentUrl = viewModel.currentUrl.collectAsState().value,
+                onSave = { url -> viewModel.updateUrl(url); viewModel.saveUrl() },
+                onNavigateBack = onNavigateBack
             )
         }
         is SheetUrlConfigUiState.Success -> {
-            SheetUrlConfigContent(
-                currentUrl = state.currentUrl,
-                onSave = { url -> viewModel.saveSheetUrl(url, onConfigurationComplete) },
-                onNavigateBack = onNavigateBack
-            )
+            onConfigurationComplete()
         }
     }
 }

@@ -43,9 +43,9 @@ class AssignmentListViewModel(
         }
     }
 
-    fun toggleAssignmentCompletion(id: String, completed: Boolean) {
+    fun toggleAssignmentCompletion(id: String) {
         viewModelScope.launch {
-            assignmentRepository.updateAssignmentCompletion(id, completed)
+            assignmentRepository.toggleAssignmentCompletion(id)
         }
     }
 }

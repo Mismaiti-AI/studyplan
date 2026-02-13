@@ -79,7 +79,7 @@ private fun ExamListContent(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(16.dp),
-            verticalArrangement = androidx.compose.foundation.layout.arrangement.spacedBy(8.dp)
+            verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)
         ) {
             items(exams) { exam ->
                 ExamItem(

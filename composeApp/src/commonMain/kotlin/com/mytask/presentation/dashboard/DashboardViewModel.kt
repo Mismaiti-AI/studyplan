@@ -51,9 +51,16 @@ class DashboardViewModel(
         assignmentRepository.error,
         examRepository.error,
         projectRepository.error
-    ) { assignments, exams, projects, _, _, _, error1, error2, error3 ->
+    ) { flows ->
+        val assignments = flows[0] as List<Assignment>
+        val exams = flows[1] as List<Exam>
+        val projects = flows[2] as List<Project>
+        val error1 = flows[6] as String?
+        val error2 = flows[7] as String?
+        val error3 = flows[8] as String?
+
         val combinedError = listOfNotNull(error1, error2, error3).firstOrNull()
-        
+
         when {
             combinedError != null -> DashboardUiState.Error(combinedError)
             else -> {
@@ -61,7 +68,9 @@ class DashboardViewModel(
                 val upcomingAssignments = assignments.filter {
                     !it.completed && it.dueDate != null && it.dueDate >= now
                 }.take(5)
-                val upcomingExams = exams.filter { it.isUpcoming }.take(5)
+                val upcomingExams = exams.filter { exam ->
+                    exam.examDate != null && exam.examDate >= now
+                }.take(5)
                 val upcomingProjects = projects.filter {
                     !it.completed && it.dueDate != null && it.dueDate >= now
                 }.take(5)

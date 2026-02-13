@@ -80,7 +80,7 @@ private fun ProjectListContent(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(16.dp),
-            verticalArrangement = androidx.compose.foundation.layout.arrangement.spacedBy(8.dp)
+            verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)
         ) {
             items(projects) { project ->
                 ProjectItem(

@@ -18,11 +18,15 @@ sealed interface ProjectDetailUiState {
 }
 
 class ProjectDetailViewModel(
+    private val projectId: String,
     private val projectRepository: ProjectRepository
 ) : ViewModel() {
 
-    private var currentProjectId: String? = null
     private var _project: Project? = null
+
+    init {
+        loadProject(projectId)
+    }
 
     val uiState: StateFlow<ProjectDetailUiState> = combine(
         projectRepository.isLoading,
@@ -41,7 +45,6 @@ class ProjectDetailViewModel(
     )
 
     fun loadProject(id: String) {
-        currentProjectId = id
         viewModelScope.launch {
             val project = projectRepository.getProjectById(id)
             if (project != null) {
@@ -50,11 +53,9 @@ class ProjectDetailViewModel(
         }
     }
 
-    fun updateProgress(progress: Int, completed: Boolean) {
-        currentProjectId?.let { id ->
-            viewModelScope.launch {
-                projectRepository.updateProjectProgress(id, progress, completed)
-            }
+    fun updateProgress(progress: Int) {
+        viewModelScope.launch {
+            projectRepository.updateProjectProgress(projectId, progress)
         }
     }
 }

@@ -43,9 +43,9 @@ class ProjectListViewModel(
         }
     }
 
-    fun updateProjectProgress(id: String, progress: Int, completed: Boolean) {
+    fun updateProjectProgress(id: String, progress: Int) {
         viewModelScope.launch {
-            projectRepository.updateProjectProgress(id, progress, completed)
+            projectRepository.updateProjectProgress(id, progress)
         }
     }
 }

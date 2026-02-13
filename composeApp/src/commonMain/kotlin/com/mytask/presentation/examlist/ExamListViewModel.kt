@@ -43,9 +43,9 @@ class ExamListViewModel(
         }
     }
 
-    fun updatePreparationStatus(id: String, status: Boolean) {
+    fun updatePreparationStatus(id: String) {
         viewModelScope.launch {
-            examRepository.updateExamPreparationStatus(id, status)
+            examRepository.toggleExamPreparationStatus(id)
         }
     }
 }

@@ -47,7 +47,7 @@ fun SettingsScreen(
         }
         is SettingsUiState.Success -> {
             SettingsContent(
-                googleSheetsUrl = state.googleSheetsUrl,
+                googleSheetsUrl = state.config?.googleSheetsUrl ?: "",
                 onNavigateBack = onNavigateBack,
                 onNavigateToSheetConfig = onNavigateToSheetConfig
             )

@@ -18,11 +18,15 @@ sealed interface ExamDetailUiState {
 }
 
 class ExamDetailViewModel(
+    private val examId: String,
     private val examRepository: ExamRepository
 ) : ViewModel() {
 
-    private var currentExamId: String? = null
     private var _exam: Exam? = null
+
+    init {
+        loadExam(examId)
+    }
 
     val uiState: StateFlow<ExamDetailUiState> = combine(
         examRepository.isLoading,
@@ -41,7 +45,6 @@ class ExamDetailViewModel(
     )
 
     fun loadExam(id: String) {
-        currentExamId = id
         viewModelScope.launch {
             val exam = examRepository.getExamById(id)
             if (exam != null) {
@@ -51,10 +54,8 @@ class ExamDetailViewModel(
     }
 
     fun updatePreparationStatus(status: Boolean) {
-        currentExamId?.let { id ->
-            viewModelScope.launch {
-                examRepository.updateExamPreparationStatus(id, status)
-            }
+        viewModelScope.launch {
+            examRepository.toggleExamPreparationStatus(examId)
         }
     }
 }

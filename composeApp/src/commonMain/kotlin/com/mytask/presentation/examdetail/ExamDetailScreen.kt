@@ -45,14 +45,14 @@ fun ExamDetailScreen(
         is ExamDetailUiState.Error -> {
             ErrorMessage(
                 message = state.message,
-                onRetry = { viewModel.loadExam() }
+                onRetry = { viewModel.loadExam(examId) }
             )
         }
         is ExamDetailUiState.Success -> {
             ExamDetailContent(
                 exam = state.exam,
-                isPrepared = state.isPrepared,
-                onPreparedChange = { viewModel.togglePrepared() },
+                isPrepared = state.exam.preparationStatus,
+                onPreparedChange = { viewModel.updatePreparationStatus(it) },
                 onNavigateBack = onNavigateBack
             )
         }
