@@ -1,18 +1,8 @@
 package com.mytask.di
 
-import com.mytask.data.local.dao.AppConfigDao
-import com.mytask.data.local.dao.AssignmentDao
-import com.mytask.data.local.dao.ExamDao
-import com.mytask.data.local.dao.ProjectDao
-import org.koin.core.module.Module
+import com.mytask.core.database.AppDatabase
 import org.koin.dsl.module
 
-expect fun databaseModule(): Module
-
-val commonDatabaseModule = module {
-    // DAOs - extracted from AppDatabase
-    single { get<AppDatabase>().assignmentDao() }
-    single { get<AppDatabase>().examDao() }
-    single { get<AppDatabase>().projectDao() }
-    single { get<AppDatabase>().appConfigDao() }
+val databaseModule = module {
+    // DAOs are registered in platformModule after AppDatabase is created
 }

@@ -6,6 +6,10 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 
+// Platform-specific system appearance configuration
+@Composable
+internal expect fun SystemAppearance(isDark: Boolean)
+
 // Light color scheme using updated colors from AppColors.kt
 private val LightColorScheme = lightColorScheme(
     primary = LightPrimary,
@@ -50,6 +54,8 @@ fun AppTheme(
     } else {
         LightColorScheme
     }
+
+    SystemAppearance(isDark = darkTheme)
 
     MaterialTheme(
         colorScheme = colorScheme,

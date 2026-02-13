@@ -1,12 +1,18 @@
 package com.mytask.data.repositories.exam
 
-import com.mytask.core.network.ApiResult
 import com.mytask.data.local.dao.ExamDao
+import com.mytask.data.local.entity.ExamEntity
 import com.mytask.data.remote.service.SheetsApiService
 import com.mytask.domain.model.Exam
-import com.mytask.data.repositories.exam.ExamRepository
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
@@ -15,71 +21,136 @@ class ExamRepositoryImpl(
     private val sheetsApi: SheetsApiService,
     private val examDao: ExamDao
 ) : ExamRepository {
-    
-    override val exams: Flow<List<Exam>>
-        get() = examDao.getAll().map { entities ->
-            entities.map { it.toDomain() }
-        }
-    
-    override val isLoading: Flow<Boolean>
-        get() = kotlinx.coroutines.flow.flowOf(false) // Simplified for now
-    
-    override val error: Flow<String?>
-        get() = kotlinx.coroutines.flow.flowOf(null) // Simplified for now
-    
-    override suspend fun loadExams(): ApiResult<Unit> {
+
+    private val repositoryScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+
+    // ═══════════════════════════════════════════════════════════════
+    // STATE MANAGEMENT - Repository holds state
+    // ═══════════════════════════════════════════════════════════════
+
+    override val exams: StateFlow<List<Exam>> = examDao.getAll()
+        .map { entities -> entities.map { it.toDomain() } }
+        .stateIn(repositoryScope, SharingStarted.Eagerly, emptyList())
+
+    private val _selectedExam = MutableStateFlow<Exam?>(null)
+    override val selectedExam: StateFlow<Exam?> = _selectedExam.asStateFlow()
+
+    private val _isLoading = MutableStateFlow(false)
+    override val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private val _error = MutableStateFlow<String?>(null)
+    override val error: StateFlow<String?> = _error.asStateFlow()
+
+    // ═══════════════════════════════════════════════════════════════
+    // ACTIONS
+    // ═══════════════════════════════════════════════════════════════
+
+    override suspend fun loadExams(): List<Exam> {
+        _isLoading.value = true
+        _error.value = null
         return try {
-            // In a real implementation, this would fetch from Google Sheets
-            // For now, we'll just return success
-            ApiResult.Success(Unit)
+            val entities = examDao.getAllOnce()
+            entities.map { it.toDomain() }
         } catch (e: Exception) {
-            ApiResult.Error(e)
+            _error.value = e.message ?: "Unknown error loading exams"
+            emptyList()
+        } finally {
+            _isLoading.value = false
         }
     }
-    
+
+    override suspend fun refreshExams(): List<Exam> {
+        return loadExams()
+    }
+
+    override suspend fun selectExam(examId: String) {
+        val exam = examDao.getById(examId)?.toDomain()
+        _selectedExam.value = exam
+    }
+
+    override fun clearSelection() {
+        _selectedExam.value = null
+    }
+
     override suspend fun getExamById(id: String): Exam? {
         return examDao.getById(id)?.toDomain()
     }
-    
-    override suspend fun updateExamPreparationStatus(id: String, status: Boolean): ApiResult<Unit> {
+
+    override suspend fun createExam(exam: Exam): Exam? {
+        _isLoading.value = true
+        _error.value = null
         return try {
-            // Update local database
-            examDao.updatePreparationStatus(id, status)
-            
-            // In a real implementation, this would also update Google Sheets
-            // For now, we'll just return success
-            ApiResult.Success(Unit)
-        } catch (e: Exception) {
-            ApiResult.Error(e)
-        }
-    }
-    
-    override suspend fun createExam(exam: Exam): ApiResult<Exam> {
-        return try {
-            val entity = exam.copy(id = java.util.UUID.randomUUID().toString()).toEntity()
+            val newExam = if (exam.id.isEmpty()) {
+                exam.copy(id = generateId())
+            } else {
+                exam
+            }
+            val entity = newExam.toEntity()
             examDao.upsert(entity)
-            ApiResult.Success(entity.toDomain())
+            newExam
         } catch (e: Exception) {
-            ApiResult.Error(e)
+            _error.value = e.message ?: "Unknown error creating exam"
+            null
+        } finally {
+            _isLoading.value = false
         }
     }
-    
-    override suspend fun updateExam(exam: Exam): ApiResult<Exam> {
+
+    override suspend fun updateExam(exam: Exam): Exam? {
+        _isLoading.value = true
+        _error.value = null
         return try {
             examDao.upsert(exam.toEntity())
-            ApiResult.Success(exam)
+            exam
         } catch (e: Exception) {
-            ApiResult.Error(e)
+            _error.value = e.message ?: "Unknown error updating exam"
+            null
+        } finally {
+            _isLoading.value = false
         }
     }
-    
-    override suspend fun deleteExam(id: String): ApiResult<Unit> {
+
+    override suspend fun deleteExam(id: String): Boolean {
+        _isLoading.value = true
+        _error.value = null
         return try {
             examDao.deleteById(id)
-            ApiResult.Success(Unit)
+            true
         } catch (e: Exception) {
-            ApiResult.Error(e)
+            _error.value = e.message ?: "Unknown error deleting exam"
+            false
+        } finally {
+            _isLoading.value = false
         }
+    }
+
+    override suspend fun toggleExamPreparationStatus(id: String): Boolean {
+        _isLoading.value = true
+        _error.value = null
+        return try {
+            val exam = examDao.getById(id)?.toDomain()
+            if (exam != null) {
+                val updated = exam.copy(preparationStatus = !exam.preparationStatus)
+                examDao.upsert(updated.toEntity())
+                true
+            } else {
+                _error.value = "Exam not found"
+                false
+            }
+        } catch (e: Exception) {
+            _error.value = e.message ?: "Unknown error toggling preparation status"
+            false
+        } finally {
+            _isLoading.value = false
+        }
+    }
+
+    override fun clearError() {
+        _error.value = null
+    }
+
+    private fun generateId(): String {
+        return "exam_${kotlin.time.Clock.System.now().toEpochMilliseconds()}"
     }
 }
 

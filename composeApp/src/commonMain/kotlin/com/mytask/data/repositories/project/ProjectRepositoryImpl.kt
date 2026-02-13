@@ -1,12 +1,18 @@
 package com.mytask.data.repositories.project
 
-import com.mytask.core.network.ApiResult
 import com.mytask.data.local.dao.ProjectDao
+import com.mytask.data.local.entity.ProjectEntity
 import com.mytask.data.remote.service.SheetsApiService
 import com.mytask.domain.model.Project
-import com.mytask.data.repositories.project.ProjectRepository
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
@@ -15,71 +21,163 @@ class ProjectRepositoryImpl(
     private val sheetsApi: SheetsApiService,
     private val projectDao: ProjectDao
 ) : ProjectRepository {
-    
-    override val projects: Flow<List<Project>>
-        get() = projectDao.getAll().map { entities ->
-            entities.map { it.toDomain() }
-        }
-    
-    override val isLoading: Flow<Boolean>
-        get() = kotlinx.coroutines.flow.flowOf(false) // Simplified for now
-    
-    override val error: Flow<String?>
-        get() = kotlinx.coroutines.flow.flowOf(null) // Simplified for now
-    
-    override suspend fun loadProjects(): ApiResult<Unit> {
+
+    private val repositoryScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+
+    // ═══════════════════════════════════════════════════════════════
+    // STATE MANAGEMENT - Repository holds state
+    // ═══════════════════════════════════════════════════════════════
+
+    override val projects: StateFlow<List<Project>> = projectDao.getAll()
+        .map { entities -> entities.map { it.toDomain() } }
+        .stateIn(repositoryScope, SharingStarted.Eagerly, emptyList())
+
+    private val _selectedProject = MutableStateFlow<Project?>(null)
+    override val selectedProject: StateFlow<Project?> = _selectedProject.asStateFlow()
+
+    private val _isLoading = MutableStateFlow(false)
+    override val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private val _error = MutableStateFlow<String?>(null)
+    override val error: StateFlow<String?> = _error.asStateFlow()
+
+    // ═══════════════════════════════════════════════════════════════
+    // ACTIONS
+    // ═══════════════════════════════════════════════════════════════
+
+    override suspend fun loadProjects(): List<Project> {
+        _isLoading.value = true
+        _error.value = null
         return try {
-            // In a real implementation, this would fetch from Google Sheets
-            // For now, we'll just return success
-            ApiResult.Success(Unit)
+            val entities = projectDao.getAllOnce()
+            entities.map { it.toDomain() }
         } catch (e: Exception) {
-            ApiResult.Error(e)
+            _error.value = e.message ?: "Unknown error loading projects"
+            emptyList()
+        } finally {
+            _isLoading.value = false
         }
     }
-    
+
+    override suspend fun refreshProjects(): List<Project> {
+        return loadProjects()
+    }
+
+    override suspend fun selectProject(projectId: String) {
+        val project = projectDao.getById(projectId)?.toDomain()
+        _selectedProject.value = project
+    }
+
+    override fun clearSelection() {
+        _selectedProject.value = null
+    }
+
     override suspend fun getProjectById(id: String): Project? {
         return projectDao.getById(id)?.toDomain()
     }
-    
-    override suspend fun updateProjectProgress(id: String, progress: Int, completed: Boolean): ApiResult<Unit> {
+
+    override suspend fun createProject(project: Project): Project? {
+        _isLoading.value = true
+        _error.value = null
         return try {
-            // Update local database
-            projectDao.updateProgress(id, progress, completed)
-            
-            // In a real implementation, this would also update Google Sheets
-            // For now, we'll just return success
-            ApiResult.Success(Unit)
-        } catch (e: Exception) {
-            ApiResult.Error(e)
-        }
-    }
-    
-    override suspend fun createProject(project: Project): ApiResult<Project> {
-        return try {
-            val entity = project.copy(id = java.util.UUID.randomUUID().toString()).toEntity()
+            val newProject = if (project.id.isEmpty()) {
+                project.copy(id = generateId())
+            } else {
+                project
+            }
+            val entity = newProject.toEntity()
             projectDao.upsert(entity)
-            ApiResult.Success(entity.toDomain())
+            newProject
         } catch (e: Exception) {
-            ApiResult.Error(e)
+            _error.value = e.message ?: "Unknown error creating project"
+            null
+        } finally {
+            _isLoading.value = false
         }
     }
-    
-    override suspend fun updateProject(project: Project): ApiResult<Project> {
+
+    override suspend fun updateProject(project: Project): Project? {
+        _isLoading.value = true
+        _error.value = null
         return try {
             projectDao.upsert(project.toEntity())
-            ApiResult.Success(project)
+            project
         } catch (e: Exception) {
-            ApiResult.Error(e)
+            _error.value = e.message ?: "Unknown error updating project"
+            null
+        } finally {
+            _isLoading.value = false
         }
     }
-    
-    override suspend fun deleteProject(id: String): ApiResult<Unit> {
+
+    override suspend fun deleteProject(id: String): Boolean {
+        _isLoading.value = true
+        _error.value = null
         return try {
             projectDao.deleteById(id)
-            ApiResult.Success(Unit)
+            true
         } catch (e: Exception) {
-            ApiResult.Error(e)
+            _error.value = e.message ?: "Unknown error deleting project"
+            false
+        } finally {
+            _isLoading.value = false
         }
+    }
+
+    override suspend fun updateProjectProgress(id: String, progress: Int): Boolean {
+        _isLoading.value = true
+        _error.value = null
+        return try {
+            val project = projectDao.getById(id)?.toDomain()
+            if (project != null) {
+                val updated = project.copy(
+                    progress = progress.coerceIn(0, 100),
+                    completed = progress >= 100
+                )
+                projectDao.upsert(updated.toEntity())
+                true
+            } else {
+                _error.value = "Project not found"
+                false
+            }
+        } catch (e: Exception) {
+            _error.value = e.message ?: "Unknown error updating progress"
+            false
+        } finally {
+            _isLoading.value = false
+        }
+    }
+
+    override suspend fun toggleProjectCompletion(id: String): Boolean {
+        _isLoading.value = true
+        _error.value = null
+        return try {
+            val project = projectDao.getById(id)?.toDomain()
+            if (project != null) {
+                val updated = project.copy(
+                    completed = !project.completed,
+                    progress = if (!project.completed) 100 else project.progress
+                )
+                projectDao.upsert(updated.toEntity())
+                true
+            } else {
+                _error.value = "Project not found"
+                false
+            }
+        } catch (e: Exception) {
+            _error.value = e.message ?: "Unknown error toggling completion"
+            false
+        } finally {
+            _isLoading.value = false
+        }
+    }
+
+    override fun clearError() {
+        _error.value = null
+    }
+
+    private fun generateId(): String {
+        return "project_${kotlin.time.Clock.System.now().toEpochMilliseconds()}"
     }
 }
 

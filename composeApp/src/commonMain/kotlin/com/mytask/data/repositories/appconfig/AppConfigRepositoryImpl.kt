@@ -1,12 +1,18 @@
 package com.mytask.data.repositories.appconfig
 
-import com.mytask.core.network.ApiResult
 import com.mytask.data.local.dao.AppConfigDao
+import com.mytask.data.local.entity.AppConfigEntity
 import com.mytask.data.remote.service.SheetsApiService
 import com.mytask.domain.model.AppConfig
-import com.mytask.data.repositories.appconfig.AppConfigRepository
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
@@ -15,54 +21,83 @@ class AppConfigRepositoryImpl(
     private val sheetsApi: SheetsApiService,
     private val appConfigDao: AppConfigDao
 ) : AppConfigRepository {
-    
-    override val config: Flow<AppConfig?>
-        get() = appConfigDao.getConfig().map { entity ->
-            entity?.toDomain()
-        }
-    
-    override val isLoading: Flow<Boolean>
-        get() = kotlinx.coroutines.flow.flowOf(false) // Simplified for now
-    
-    override val error: Flow<String?>
-        get() = kotlinx.coroutines.flow.flowOf(null) // Simplified for now
-    
-    override suspend fun loadConfig(): ApiResult<Unit> {
+
+    private val repositoryScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+
+    // ═══════════════════════════════════════════════════════════════
+    // STATE MANAGEMENT - Repository holds state
+    // ═══════════════════════════════════════════════════════════════
+
+    override val config: StateFlow<AppConfig?> = appConfigDao.getConfig()
+        .map { entity -> entity?.toDomain() }
+        .stateIn(repositoryScope, SharingStarted.Eagerly, null)
+
+    private val _isLoading = MutableStateFlow(false)
+    override val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private val _error = MutableStateFlow<String?>(null)
+    override val error: StateFlow<String?> = _error.asStateFlow()
+
+    // ═══════════════════════════════════════════════════════════════
+    // ACTIONS
+    // ═══════════════════════════════════════════════════════════════
+
+    override suspend fun loadConfig(): AppConfig? {
+        _isLoading.value = true
+        _error.value = null
         return try {
             // In a real implementation, this would fetch from Google Sheets
-            // For now, we'll just return success
-            ApiResult.Success(Unit)
+            // For now, we'll just return the locally stored config
+            val entity = appConfigDao.getById("app_config_singleton")
+            entity?.toDomain()
         } catch (e: Exception) {
-            ApiResult.Error(e)
+            _error.value = e.message ?: "Unknown error loading config"
+            null
+        } finally {
+            _isLoading.value = false
         }
     }
-    
-    override suspend fun getConfig(): AppConfig? {
-        return appConfigDao.getById("app_config_singleton")?.toDomain()
-    }
-    
-    override suspend fun updateConfig(config: AppConfig): ApiResult<AppConfig> {
+
+    override suspend fun saveConfig(config: AppConfig): Boolean {
+        _isLoading.value = true
+        _error.value = null
         return try {
             val entity = config.toEntity()
             appConfigDao.upsert(entity)
-            ApiResult.Success(config)
+            true
         } catch (e: Exception) {
-            ApiResult.Error(e)
+            _error.value = e.message ?: "Unknown error saving config"
+            false
+        } finally {
+            _isLoading.value = false
         }
     }
-    
-    override suspend fun validateSheetUrl(url: String): ApiResult<Boolean> {
+
+    override suspend fun updateGoogleSheetUrl(url: String): Boolean {
+        _isLoading.value = true
+        _error.value = null
         return try {
-            // In a real implementation, this would ping the Google Sheets API
-            // For now, we'll just return success if URL is not empty
-            if (url.isNotBlank()) {
-                ApiResult.Success(true)
-            } else {
-                ApiResult.Success(false)
-            }
+            val currentConfig = appConfigDao.getById("app_config_singleton")?.toDomain()
+                ?: AppConfig(googleSheetsUrl = url)
+
+            val updatedConfig = currentConfig.copy(
+                googleSheetsUrl = url,
+                updatedAt = kotlin.time.Clock.System.now()
+            )
+
+            val entity = updatedConfig.toEntity()
+            appConfigDao.upsert(entity)
+            true
         } catch (e: Exception) {
-            ApiResult.Error(e)
+            _error.value = e.message ?: "Unknown error updating Google Sheet URL"
+            false
+        } finally {
+            _isLoading.value = false
         }
+    }
+
+    override fun clearError() {
+        _error.value = null
     }
 }
 

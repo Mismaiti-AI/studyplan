@@ -5,7 +5,7 @@ import com.mytask.di.appModule
 import com.mytask.di.databaseModule
 import com.mytask.di.networkModule
 import com.mytask.di.platformModule
-import com.mytask.presentation.navigation.NavigationHost
+import com.mytask.navigation.NavigationHost
 import com.mytask.presentation.theme.AppTheme
 import org.koin.compose.KoinApplication
 import org.koin.dsl.KoinAppDeclaration
