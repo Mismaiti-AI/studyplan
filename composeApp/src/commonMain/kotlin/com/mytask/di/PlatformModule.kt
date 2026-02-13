@@ -10,10 +10,9 @@ import org.koin.dsl.module
 expect fun platformModule(): Module
 
 val networkModule = module {
-    single { io.ktor.client.engine.HttpClientEngineFactory.createDefault() }
-    single { HttpClient(get()) }
-    single { SheetsApiConfig(get()) }
-    single { SheetsApiService(get(), get()) }
+    single<HttpClient> { HttpClient() }
+    single<SheetsApiConfig> { SheetsApiConfig(get()) }
+    single<SheetsApiService> { SheetsApiService(get(), get()) }
 }
 
 val commonModule = module {

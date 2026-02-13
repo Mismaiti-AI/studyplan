@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mytask.core.config.SheetsApiConfig
 import com.mytask.data.repositories.appconfig.AppConfigRepository
-import com.mytask.domain.model.AppConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,31 +35,18 @@ class SheetUrlConfigViewModel(
     fun saveUrl() {
         viewModelScope.launch {
             _uiState.value = SheetUrlConfigUiState.Loading
-            
+
             try {
-                // Validate the URL first
-                val validationResult = appConfigRepository.validateSheetUrl(_currentUrl.value)
-                
-                if (validationResult is com.mytask.core.network.ApiResult.Success && validationResult.data) {
-                    // Save the URL to the config
-                    sheetsApiConfig.scriptUrl = _currentUrl.value
-                    
-                    // Update the app config in the repository
-                    val config = AppConfig(
-                        googleSheetsUrl = _currentUrl.value,
-                        createdAt = null, // We'll let the repo handle timestamps
-                        updatedAt = kotlin.time.Instant.fromEpochMilliseconds(System.currentTimeMillis())
-                    )
-                    
-                    val result = appConfigRepository.updateConfig(config)
-                    
-                    if (result is com.mytask.core.network.ApiResult.Success) {
-                        _uiState.value = SheetUrlConfigUiState.Success("Configuration saved successfully!")
-                    } else {
-                        _uiState.value = SheetUrlConfigUiState.Error("Failed to save configuration")
-                    }
+                // Save the URL to the config
+                sheetsApiConfig.scriptUrl = _currentUrl.value
+
+                // Update the Google Sheets URL in the repository
+                val success = appConfigRepository.updateGoogleSheetUrl(_currentUrl.value)
+
+                if (success) {
+                    _uiState.value = SheetUrlConfigUiState.Success("Configuration saved successfully!")
                 } else {
-                    _uiState.value = SheetUrlConfigUiState.Error("Invalid URL or connection failed")
+                    _uiState.value = SheetUrlConfigUiState.Error("Failed to save configuration")
                 }
             } catch (e: Exception) {
                 _uiState.value = SheetUrlConfigUiState.Error(e.message ?: "An error occurred")
